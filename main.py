@@ -14,12 +14,10 @@ class TuringMachine:
             ('q1', ' '): ('q_accept', ' ', 'S')
         }
 
-        # Inicializar el grafo
         self.graph = nx.DiGraph()
 
-        # Agregar nodos y transiciones al grafo
         for state, symbol in self.transitions.keys():
-            self.graph.add_node(state, pos=(0, 0))  # Agregar posición inicial a cada nodo
+            self.graph.add_node(state, pos=(0, 0))  
             self.graph.add_node(self.transitions[(state, symbol)][0], pos=(0, 0))
             self.graph.add_edge(state, self.transitions[(state, symbol)][0], label=symbol)
 
@@ -54,5 +52,5 @@ class TuringMachine:
         labels = nx.get_edge_attributes(self.graph, 'label')
         nx.draw(self.graph, pos, with_labels=True, font_weight='bold')
         nx.draw_networkx_edge_labels(self.graph, pos, edge_labels=labels)
-        plt.pause(0.5)  # Pausa para visualizar la transición
-        plt.clf()  # Limpia el gráfico para la próxima iteración
+        plt.pause(0.5)  
+        plt.clf()  

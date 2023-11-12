@@ -1,37 +1,53 @@
 import PySimpleGUI as sg
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from main import TuringMachine
+import networkx as nx
 
-class TuringMachineGUI:
-    def __init__(self):
-        self.tm = TuringMachine()
 
-        layout = [
-            [sg.Text("Ingrese la palabra sobre {a, b}:")],
-            [sg.InputText(key='-INPUT-')],
-            [sg.Button('Ejecutar'), sg.Button('Salir')],
-            [sg.Text(size=(40, 1), key='-OUTPUT-')]
-        ]
+def get_figure_canvas(window):
+    figure, ax = plt.subplots(figsize=(5, 5))
+    canvas = FigureCanvasTkAgg(figure, window['-CANVAS-'].TKCanvas)
+    canvas.draw()
+    canvas.get_tk_widget().pack(side='top', fill='both', expand=1)
+    return figure, canvas
 
-        self.window = sg.Window('Máquina de Turing', layout)
+def draw_graph(graph, canvas, figure):
+    pos = nx.spring_layout(graph)
+    nx.draw(graph, pos, with_labels=True, font_weight='bold', ax=figure.gca())
+    canvas.draw()
 
-    def run(self):
-        while True:
-            event, values = self.window.read()
+def main():
+    tm = TuringMachine()
 
-            if event in (sg.WINDOW_CLOSED, 'Salir'):
-                break
+    layout = [
+        [sg.Text("Ingrese la palabra sobre {a, b, espacio en blanco}:")],
+        [sg.InputText(key='-INPUT-')],
+        [sg.Button('Ejecutar'), sg.Button('Salir')],
+        [sg.Canvas(key='-CANVAS-', size=(400, 400))],
+        [sg.Text(size=(40, 1), key='-OUTPUT-')]
+    ]
 
-            elif event == 'Ejecutar':
-                input_word = values['-INPUT-'].strip()
+    window = sg.Window('Máquina de Turing', layout, finalize=True)
+    figure, canvas = get_figure_canvas(window)
 
-                if input_word:
-                    self.tm.set_tape(input_word)
-                    self.tm.run()
-                    final_configuration = self.tm.get_tape_content()
-                    self.window['-OUTPUT-'].update(f"Configuración final: {final_configuration}")
+    while True:
+        event, values = window.read()
 
-        self.window.close()
+        if event in (sg.WINDOW_CLOSED, 'Salir'):
+            break
+
+        elif event == 'Ejecutar':
+            input_word = values['-INPUT-'].strip()
+
+            if input_word:
+                tm.set_tape(input_word)
+                tm.run()
+                final_configuration = tm.get_tape_content()
+                window['-OUTPUT-'].update(f"Configuración final: {final_configuration}")
+                draw_graph(tm.get_graph(), canvas, figure)
+
+    window.close()
 
 if __name__ == "__main__":
-    app = TuringMachineGUI()
-    app.run()
+    main()

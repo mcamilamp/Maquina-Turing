@@ -1,5 +1,3 @@
-
-
 import networkx as nx
 
 class TuringMachine:
@@ -13,7 +11,10 @@ class TuringMachine:
             ('q1', ' '): ('q_accept', ' ', 'S'),
             ('q2', 'a'): ('q2', 'a', 'R'),
             ('q2', 'b'): ('q2', 'a', 'R'),  
-            ('q2', ' '): ('q_accept', ' ', 'S')
+            ('q2', ' '): ('q3', ' ', 'R'),  
+            ('q3', 'a'): ('q3', 'a', 'R'),
+            ('q3', 'b'): ('q3', 'a', 'R'),  
+            ('q3', ' '): ('q_accept', ' ', 'S')
         }
 
         self.graph = nx.DiGraph()
@@ -24,7 +25,7 @@ class TuringMachine:
             self.graph.add_edge(state, self.transitions[(state, symbol)][0], label=symbol)
 
     def set_tape(self, input_word):
-        self.tape = list(input_word) + [' ']
+        self.tape = list(input_word + ' ')
         self.head_position = 0
         self.state = 'q1'
 
@@ -41,12 +42,14 @@ class TuringMachine:
                     self.head_position -= 1
 
                 self.state = new_state
+            else:
+                self.state = 'q_accept'
         else:
             self.state = 'q_accept'
 
     def run(self):
         visited_nodes = []
-        while self.state != 'q_accept' and 0 <= self.head_position < len(self.tape):
+        while self.state != 'q_accept':
             visited_nodes.append(self.state)
             self.step()
 

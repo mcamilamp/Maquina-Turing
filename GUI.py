@@ -15,14 +15,17 @@ def get_figure_canvas(window):
 def draw_graph(graph, canvas, figure):
     pos = nx.spring_layout(graph)
     node_colors = [graph.nodes[node]['color'] for node in graph.nodes]
+    
+    figure.gca().clear()
+    
     nx.draw(graph, pos, with_labels=True, font_weight='bold', ax=figure.gca(), node_color=node_colors)
-
     canvas.draw()
 
 def update_tape_display(window, tape_content, head_position):
     tape_display = '| ' + ' '.join(tape_content) + ' |'
+    head_indicator = ' ' * (head_position * 2) + 'V'
     window['-TAPE-'].update(tape_display)
-    window['-HEAD-'].update(head_position * 2 + 2)  
+    window['-HEAD-'].update(head_indicator)
 
 def main():
     tm = TuringMachine()
@@ -31,9 +34,9 @@ def main():
         [sg.Text('Input:'), sg.Text('Output:', pad=((190, 0), 0))],
         [sg.Multiline(size=(30, 5), key='-INPUT-'), sg.Output(size=(30, 5), key='-OUTPUT-')],
         [sg.Button('Ejecutar'), sg.Button('Siguiente Paso')],
-        [sg.Canvas(key='-CANVAS-', size=(300, 300))],  
-        [sg.Text('', key='-TAPE-', size=(30, 1))],  
-        [sg.Text('', key='-HEAD-', size=(30, 1))],  
+        [sg.Canvas(key='-CANVAS-', size=(300, 300))],
+        [sg.Text('', key='-TAPE-', size=(30, 1))],
+        [sg.Text('', key='-HEAD-', size=(30, 1))],
         [sg.Text('Speed:'), sg.Slider(range=(1, 10), default_value=5, orientation='h', size=(15, 20), key='-SPEED-')],
         [sg.Button('Salir')]
     ]
@@ -61,6 +64,9 @@ def main():
                     all_results.append(f"Palabra: {input_word}, Resultado: {final_configuration}")
 
                 window['-OUTPUT-'].update('\n'.join(all_results))
+                
+                figure.gca().clear()
+                
                 draw_graph(tm.get_graph(), canvas, figure)
 
         elif event == 'Siguiente Paso':
@@ -72,12 +78,15 @@ def main():
             if input_words:
                 for input_word in input_words:
                     tm.set_tape(input_word)
-                    tm.step()  
+                    tm.step()
                     current_configuration = tm.get_tape_content()
                     all_results.append(f"Palabra: {input_word}, Configuración actual: {current_configuration}")
 
                     update_tape_display(window, tm.tape, tm.head_position)
-                    draw_graph(tm.get_graph(), canvas, figure)
+
+                figure.gca().clear()
+                
+                draw_graph(tm.get_graph(), canvas, figure)
 
         speed = values['-SPEED-']
         time.sleep(1 / speed)

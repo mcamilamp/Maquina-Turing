@@ -22,13 +22,13 @@ def draw_graph(graph, canvas, figure):
 def update_tape_display(window, tape_content, head_position):
     tape_display = '| ' + ' '.join(tape_content) + ' |'
     window['-TAPE-'].update(tape_display)
-    window['-HEAD-'].update(head_position * 2 + 2) 
+    window['-HEAD-'].update(head_position * 2 + 2)  
 
 def main():
     tm = TuringMachine()
 
     layout = [
-        [sg.Text('Input:'), sg.Text('Output:', pad=((198, 0), 0))],
+        [sg.Text('Input:'), sg.Text('Output:', pad=((190, 0), 0))],
         [sg.Multiline(size=(30, 5), key='-INPUT-'), sg.Output(size=(30, 5), key='-OUTPUT-')],
         [sg.Button('Ejecutar'), sg.Button('Siguiente Paso')],
         [sg.Canvas(key='-CANVAS-', size=(300, 300))],  
@@ -58,7 +58,7 @@ def main():
                     tm.set_tape(input_word)
                     tm.run()
                     final_configuration = tm.get_tape_content()
-                    all_results.append(f"Palabra: {input_word}, Configuración final: {final_configuration}")
+                    all_results.append(f"Palabra: {input_word}, Resultado: {final_configuration}")
 
                 window['-OUTPUT-'].update('\n'.join(all_results))
                 draw_graph(tm.get_graph(), canvas, figure)

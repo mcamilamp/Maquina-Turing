@@ -1,9 +1,9 @@
 import PySimpleGUI as sg
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from main import TuringMachine
 import networkx as nx
-
+from main import TuringMachine
+import time  
 
 def get_figure_canvas(window):
     figure, ax = plt.subplots(figsize=(5, 5))
@@ -14,7 +14,9 @@ def get_figure_canvas(window):
 
 def draw_graph(graph, canvas, figure):
     pos = nx.spring_layout(graph)
-    nx.draw(graph, pos, with_labels=True, font_weight='bold', ax=figure.gca())
+    node_colors = [graph.nodes[node]['color'] for node in graph.nodes]
+    nx.draw(graph, pos, with_labels=True, font_weight='bold', ax=figure.gca(), node_color=node_colors)
+
     canvas.draw()
 
 def main():
@@ -25,11 +27,15 @@ def main():
         [sg.InputText(key='-INPUT-')],
         [sg.Button('Ejecutar'), sg.Button('Salir')],
         [sg.Canvas(key='-CANVAS-', size=(400, 400))],
-        [sg.Text(size=(40, 1), key='-OUTPUT-')]
+        [sg.Text(size=(40, 1), key='-OUTPUT-')],
+        [sg.Slider((1, 10), default_value=5, orientation='h', key='-SPEED-', enable_events=True),
+         sg.Text('Velocidad')],
     ]
+    
 
     window = sg.Window('Máquina de Turing', layout, finalize=True)
     figure, canvas = get_figure_canvas(window)
+
 
     while True:
         event, values = window.read()
@@ -46,6 +52,10 @@ def main():
                 final_configuration = tm.get_tape_content()
                 window['-OUTPUT-'].update(f"Configuración final: {final_configuration}")
                 draw_graph(tm.get_graph(), canvas, figure)
+
+        
+        speed = values['-SPEED-']
+        time.sleep(1 / speed)  
 
     window.close()
 

@@ -17,8 +17,8 @@ class TuringMachine:
         self.graph = nx.DiGraph()
 
         for state, symbol in self.transitions.keys():
-            self.graph.add_node(state, pos=(0, 0))
-            self.graph.add_node(self.transitions[(state, symbol)][0], pos=(0, 0))
+            self.graph.add_node(state, pos=(0, 0), color='blue')
+            self.graph.add_node(self.transitions[(state, symbol)][0], pos=(0, 0), color='blue')
             self.graph.add_edge(state, self.transitions[(state, symbol)][0], label=symbol)
 
     def set_tape(self, input_word):
@@ -43,8 +43,16 @@ class TuringMachine:
             self.state = 'q_accept'
 
     def run(self):
+        visited_nodes = []
         while self.state != 'q_accept' and 0 <= self.head_position < len(self.tape):
+            visited_nodes.append(self.state)
             self.step()
+
+        for node in self.graph.nodes:
+            if node in visited_nodes:
+                self.graph.nodes[node]['color'] = 'red'
+            else:
+                self.graph.nodes[node]['color'] = 'blue'
 
     def get_tape_content(self):
         return ''.join(self.tape)

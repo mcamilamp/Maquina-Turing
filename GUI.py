@@ -6,7 +6,7 @@ from main import TuringMachine
 import time
 
 def get_figure_canvas(window):
-    figure, ax = plt.subplots(figsize=(3, 3))  
+    figure, ax = plt.subplots(figsize=(3, 3))
     canvas = FigureCanvasTkAgg(figure, window['-CANVAS-'].TKCanvas)
     canvas.draw()
     canvas.get_tk_widget().pack(side='top', fill='both', expand=1)
@@ -22,21 +22,20 @@ def draw_graph(graph, canvas, figure):
 def update_tape_display(window, tape_content, head_position):
     tape_display = '| ' + ' '.join(tape_content) + ' |'
     window['-TAPE-'].update(tape_display)
-    window['-HEAD-'].update(head_position * 2 + 2)  
+    window['-HEAD-'].update(head_position * 2 + 2) 
 
 def main():
     tm = TuringMachine()
 
     layout = [
-        [sg.Text("Ingrese la palabra (a, b, espacio en blanco):")],
-        [sg.Multiline(key='-INPUT-', size=(20, 5))],  
-        [sg.Button('Ejecutar'), sg.Button('Siguiente Paso'), sg.Button('Salir')],
+        [sg.Text('Input:'), sg.Text('Output:', pad=((198, 0), 0))],
+        [sg.Multiline(size=(30, 5), key='-INPUT-'), sg.Output(size=(30, 5), key='-OUTPUT-')],
+        [sg.Button('Ejecutar'), sg.Button('Siguiente Paso')],
         [sg.Canvas(key='-CANVAS-', size=(300, 300))],  
         [sg.Text('', key='-TAPE-', size=(30, 1))],  
         [sg.Text('', key='-HEAD-', size=(30, 1))],  
-        [sg.Text(size=(30, 1), key='-OUTPUT-')],  
-        [sg.Slider((1, 10), default_value=5, orientation='h', key='-SPEED-', enable_events=True),
-         sg.Text('Velocidad')],
+        [sg.Text('Speed:'), sg.Slider(range=(1, 10), default_value=5, orientation='h', size=(15, 20), key='-SPEED-')],
+        [sg.Button('Salir')]
     ]
 
     window = sg.Window('Máquina de Turing', layout, finalize=True)

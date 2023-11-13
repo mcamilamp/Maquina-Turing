@@ -22,7 +22,7 @@ class TuringMachine:
             self.graph.add_edge(state, self.transitions[(state, symbol)][0], label=symbol)
 
     def set_tape(self, input_word):
-        self.tape = list(input_word)
+        self.tape = list(input_word) + [' ']
         self.head_position = 0
         self.state = 'q1'
 

@@ -1,4 +1,3 @@
-# GUI.py
 import PySimpleGUI as sg
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -7,7 +6,7 @@ from main import TuringMachine
 import time
 
 def get_figure_canvas(window):
-    figure, ax = plt.subplots(figsize=(3, 3))  # Ajusta el tamaño del gráfico
+    figure, ax = plt.subplots(figsize=(3, 3))  
     canvas = FigureCanvasTkAgg(figure, window['-CANVAS-'].TKCanvas)
     canvas.draw()
     canvas.get_tk_widget().pack(side='top', fill='both', expand=1)
@@ -23,19 +22,19 @@ def draw_graph(graph, canvas, figure):
 def update_tape_display(window, tape_content, head_position):
     tape_display = '| ' + ' '.join(tape_content) + ' |'
     window['-TAPE-'].update(tape_display)
-    window['-HEAD-'].update(head_position * 2 + 2)  # Actualiza la posición de la cabeza
+    window['-HEAD-'].update(head_position * 2 + 2)  
 
 def main():
     tm = TuringMachine()
 
     layout = [
         [sg.Text("Ingrese la palabra (a, b, espacio en blanco):")],
-        [sg.Multiline(key='-INPUT-', size=(20, 5))],  # Ajusta el tamaño del área de texto
+        [sg.Multiline(key='-INPUT-', size=(20, 5))],  
         [sg.Button('Ejecutar'), sg.Button('Siguiente Paso'), sg.Button('Salir')],
-        [sg.Canvas(key='-CANVAS-', size=(300, 300))],  # Ajusta el tamaño del lienzo
-        [sg.Text('', key='-TAPE-', size=(30, 1))],  # Etiqueta para mostrar la cinta
-        [sg.Text('', key='-HEAD-', size=(30, 1))],  # Etiqueta para mostrar la posición de la cabeza
-        [sg.Text(size=(30, 1), key='-OUTPUT-')],  # Ajusta el tamaño del área de salida
+        [sg.Canvas(key='-CANVAS-', size=(300, 300))],  
+        [sg.Text('', key='-TAPE-', size=(30, 1))],  
+        [sg.Text('', key='-HEAD-', size=(30, 1))],  
+        [sg.Text(size=(30, 1), key='-OUTPUT-')],  
         [sg.Slider((1, 10), default_value=5, orientation='h', key='-SPEED-', enable_events=True),
          sg.Text('Velocidad')],
     ]
@@ -74,7 +73,7 @@ def main():
             if input_words:
                 for input_word in input_words:
                     tm.set_tape(input_word)
-                    tm.step()  # Avanzar un paso
+                    tm.step()  
                     current_configuration = tm.get_tape_content()
                     all_results.append(f"Palabra: {input_word}, Configuración actual: {current_configuration}")
 

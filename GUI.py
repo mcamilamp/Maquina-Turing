@@ -5,6 +5,10 @@ import networkx as nx
 from matplotlib.animation import FuncAnimation
 from main import TuringMachine
 import time
+import sys
+import os
+
+MAX_FRAMES = 100  
 
 def get_figure_canvas(window):
     figure, ax = plt.subplots(figsize=(3, 3))
@@ -14,19 +18,23 @@ def get_figure_canvas(window):
     return figure, canvas
 
 def get_tape_canvas(window):
-    figure, ax = plt.subplots(figsize=(3, 0.5))  # Tamaño más pequeño para la cinta
+    figure, ax = plt.subplots(figsize=(3, 0.5))  
     canvas = FigureCanvasTkAgg(figure, window['-TAPE-CANVAS-'].TKCanvas)
     canvas.draw()
     canvas.get_tk_widget().pack(side='top', fill='both', expand=1)
     return figure, canvas
 
 def draw_graph(graph, canvas, figure):
-    pos = nx.spring_layout(graph)
-    node_colors = [graph.nodes[node]['color'] for node in graph.nodes]
+    pos = nx.spring_layout(graph, seed=42)  
+    node_colors = [graph.nodes[node].get('color', 'blue') for node in graph.nodes]
+    edge_colors = [graph[u][v].get('color', 'black') for u, v in graph.edges]
 
     figure.gca().clear()
 
-    nx.draw(graph, pos, with_labels=True, font_weight='bold', ax=figure.gca(), node_color=node_colors)
+    nx.draw_networkx_nodes(graph, pos, node_color=node_colors, ax=figure.gca())
+    nx.draw_networkx_labels(graph, pos, ax=figure.gca())
+    nx.draw_networkx_edges(graph, pos, edge_color=edge_colors, ax=figure.gca())
+
     canvas.draw()
 
 def animate_tape(ax, tape_content, head_position, color):
@@ -41,6 +49,11 @@ def animate_tape(ax, tape_content, head_position, color):
 def main():
     tm = TuringMachine()
 
+    for node in tm.graph.nodes:
+        tm.graph.nodes[node]['color'] = 'blue'
+    for u, v in tm.graph.edges:
+        tm.graph[u][v]['color'] = 'black'
+
     layout = [
         [sg.Text('Input:'), sg.Text('Output:', pad=((190, 0), 0))],
         [sg.Multiline(size=(30, 5), key='-INPUT-'), sg.Output(size=(30, 5), key='-OUTPUT-')],
@@ -48,7 +61,7 @@ def main():
         [sg.Canvas(key='-CANVAS-', size=(300, 300))],
         [sg.Text('', key='-TAPE-', size=(30, 1))],
         [sg.Text('', key='-HEAD-', size=(30, 1))],
-        [sg.Canvas(key='-TAPE-CANVAS-', size=(300, 50))],  # Nuevo Canvas para la cinta
+        [sg.Canvas(key='-TAPE-CANVAS-', size=(300, 50))], 
         [sg.Text('Speed:'), sg.Slider(range=(1, 10), default_value=5, orientation='h', size=(15, 20), key='-SPEED-')],
         [sg.Button('Salir')]
     ]
@@ -60,8 +73,7 @@ def main():
     ax_tape = tape_figure.add_subplot(111)
     tape_content = []
     head_position = 0
-    color = 'green'  # Color de la cinta cuando la cabeza está encima
-
+    color = 'blue'  
     def update_animation(frame):
         nonlocal tape_content, head_position, color
         tm.step()
@@ -69,18 +81,22 @@ def main():
         head_position = tm.head_position
     
         if len(tape_content) > 0:
-            ax_tape.clear()
-            ax_tape.set_xlim(0, len(tape_content))
-            ax_tape.set_ylim(0, 1)
             animate_tape(ax_tape, tape_content, head_position, color)
+            
+            node_colors = [tm.graph.nodes[node]['color'] for node in tm.graph.nodes]
+            edge_colors = [tm.graph[u][v]['color'] for u, v in tm.graph.edges]
+            tm.graph.node_color = node_colors
+            tm.graph.edge_color = edge_colors
+            
 
-            figure.gca().clear()
-            try:
-                draw_graph(tm.get_graph(), canvas, figure)
-            except Exception as e:
-                print(f"Error updating graph: {e}")
-
-    ani = FuncAnimation(tape_figure, update_animation, interval=100, repeat=False)
+    ani = FuncAnimation(
+        tape_figure, 
+        update_animation, 
+        interval=100, 
+        repeat=False, 
+        cache_frame_data=False, 
+        save_count=MAX_FRAMES
+    )
 
     while True:
         event, values = window.read(timeout=0)

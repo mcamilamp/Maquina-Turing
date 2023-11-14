@@ -8,8 +8,8 @@ import time
 import sys
 import os
 
-MAX_FRAMES = 100  
 
+MAX_FRAMES = 100  
 def get_figure_canvas(window):
     figure, ax = plt.subplots(figsize=(3, 3))
     canvas = FigureCanvasTkAgg(figure, window['-CANVAS-'].TKCanvas)

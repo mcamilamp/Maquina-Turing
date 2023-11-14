@@ -8,8 +8,8 @@ import time
 import sys
 import os
 
-
 MAX_FRAMES = 100  
+
 def get_figure_canvas(window):
     figure, ax = plt.subplots(figsize=(3, 3))
     canvas = FigureCanvasTkAgg(figure, window['-CANVAS-'].TKCanvas)
@@ -25,16 +25,12 @@ def get_tape_canvas(window):
     return figure, canvas
 
 def draw_graph(graph, canvas, figure):
-    pos = nx.spring_layout(graph, seed=42)  
-    node_colors = [graph.nodes[node].get('color', 'blue') for node in graph.nodes]
-    edge_colors = [graph[u][v].get('color', 'black') for u, v in graph.edges]
+    pos = nx.spring_layout(graph)
+    node_colors = [graph.nodes[node]['color'] for node in graph.nodes]
 
     figure.gca().clear()
 
-    nx.draw_networkx_nodes(graph, pos, node_color=node_colors, ax=figure.gca())
-    nx.draw_networkx_labels(graph, pos, ax=figure.gca())
-    nx.draw_networkx_edges(graph, pos, edge_color=edge_colors, ax=figure.gca())
-
+    nx.draw(graph, pos, with_labels=True, font_weight='bold', ax=figure.gca(), node_color=node_colors)
     canvas.draw()
 
 def animate_tape(ax, tape_content, head_position, color):
@@ -73,21 +69,23 @@ def main():
     ax_tape = tape_figure.add_subplot(111)
     tape_content = []
     head_position = 0
-    color = 'blue'  
+    color = 'blue'
+
     def update_animation(frame):
         nonlocal tape_content, head_position, color
         tm.step()
         tape_content = tm.tape
         head_position = tm.head_position
-    
+
         if len(tape_content) > 0:
             animate_tape(ax_tape, tape_content, head_position, color)
             
             node_colors = [tm.graph.nodes[node]['color'] for node in tm.graph.nodes]
             edge_colors = [tm.graph[u][v]['color'] for u, v in tm.graph.edges]
-            tm.graph.node_color = node_colors
-            tm.graph.edge_color = edge_colors
-            
+            nx.set_node_attributes(tm.graph, values=dict(zip(tm.graph.nodes, node_colors)), name='color')
+            nx.set_edge_attributes(tm.graph, values=dict(zip(tm.graph.edges, edge_colors)), name='color')
+
+            draw_graph(tm.graph, canvas, figure)
 
     ani = FuncAnimation(
         tape_figure, 

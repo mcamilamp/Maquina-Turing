@@ -8,11 +8,21 @@ import gettext
 import time
 import sys
 import os
+import pyttsx3
+from gtts import gTTS
+
 
 MAX_FRAMES = 100  
 localedir = os.path.join(os.path.dirname(__file__), 'locale')
 
+# Inicializar el motor de voz
+engine = pyttsx3.init()
 
+# Función para emitir mensajes de voz
+def emitir_mensaje(mensaje):
+    tts = gTTS(text=mensaje, lang='es')
+    tts.save("mensaje.mp3")
+    os.system("start mensaje.mp3")
 
 def get_figure_canvas(window):
     figure, ax = plt.subplots(figsize=(3, 3))
@@ -48,7 +58,6 @@ def animate_tape(ax, tape_content, head_position, color):
 
 def main(idioma):
 
-        
     tm = TuringMachine()
     
     translations = gettext.translation('mensajes', localedir, languages=[idioma])
@@ -60,9 +69,6 @@ def main(idioma):
     for u, v in tm.graph.edges:
         tm.graph[u][v]['color'] = 'black'
         
-  
-    
-
     layout = [
         [sg.Radio(_('Español'),'RADIO1', key='-ES-', enable_events=True),
          sg.Radio(_('Inglés'), "RADIO1", key='-EN-', enable_events=True),
@@ -111,15 +117,10 @@ def main(idioma):
             locale = 'fr'
         else:
             locale = 'es'
-       
         
         gettext.install('mensajes', localedir, names=("ngettext",))
         gettext.translation('mensajes', localedir, languages=[locale]).install()
         main(locale)
-
-        
-        
- 
 
     ani = FuncAnimation(
         tape_figure, 
@@ -157,9 +158,11 @@ def main(idioma):
                     final_configuration = tm.get_tape_content()
                     all_results.append(f'Palabra: {input_word} Resultado: {final_configuration}')
 
+                    # Agregar mensaje de voz para la aceptación
+                    if tm.state == 'q_accept':
+                        emitir_mensaje("La máquina de Turing ha aceptado la entrada.")
+
                 window['-OUTPUT-'].update('\n'.join(all_results))
-                
-                
 
         elif event == '-NEXT-':
             ani.event_source.stop()
@@ -175,14 +178,16 @@ def main(idioma):
                     current_configuration = tm.get_tape_content()
                     all_results.append(f"Palabra: {input_word} Configuración actual: {current_configuration}")
 
+                    # Agregar mensaje de voz para la aceptación
+                    if tm.state == 'q_accept':
+                        emitir_mensaje("La máquina de Turing ha aceptado la entrada.")
+
                 window['-OUTPUT-'].update('\n'.join(all_results))
 
             ani.event_source.start()
 
         speed = values['-SPEED-']
         time.sleep(1 / speed)
-        
-        
 
     ani.event_source.stop()
     window.close()

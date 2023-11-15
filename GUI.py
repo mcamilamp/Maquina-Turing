@@ -4,11 +4,13 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import networkx as nx
 from matplotlib.animation import FuncAnimation
 from main import TuringMachine
+import gettext
 import time
 import sys
 import os
 
 MAX_FRAMES = 100  
+
 
 def get_figure_canvas(window):
     figure, ax = plt.subplots(figsize=(3, 3))
@@ -43,22 +45,34 @@ def animate_tape(ax, tape_content, head_position, color):
         ax.add_patch(plt.Rectangle((i, 0), 1, 1, facecolor=color if i == head_position else 'white', edgecolor='black'))
 
 def main():
+    
+    #translations = gettext.translation('mensajes', localedir, languages=['es'])
+    #translations.install()
+    #_ = translations.gettext
+        
     tm = TuringMachine()
 
     for node in tm.graph.nodes:
         tm.graph.nodes[node]['color'] = 'blue'
     for u, v in tm.graph.edges:
         tm.graph[u][v]['color'] = 'black'
+        
+  
+    
 
     layout = [
-        [sg.Text('Input:'), sg.Text('Output:', pad=((190, 0), 0))],
+        [sg.Radio('Español','RADIO1', default=True, key='-ES-', enable_events=True),
+         sg.Radio('Inglés', "RADIO1", key='-EN-', enable_events=True),
+         sg.Radio('Francés', "RADIO1", key='-FR-', enable_events=True)],
+        
+        [sg.Text('Entrada:'), sg.Text('Salida:', pad=((190, 0), 0))],
         [sg.Multiline(size=(30, 5), key='-INPUT-'), sg.Output(size=(30, 5), key='-OUTPUT-')],
         [sg.Button('Ejecutar'), sg.Button('Siguiente Paso')],
         [sg.Canvas(key='-CANVAS-', size=(300, 300))],
         [sg.Text('', key='-TAPE-', size=(30, 1))],
         [sg.Text('', key='-HEAD-', size=(30, 1))],
         [sg.Canvas(key='-TAPE-CANVAS-', size=(300, 50))], 
-        [sg.Text('Speed:'), sg.Slider(range=(1, 10), default_value=5, orientation='h', size=(15, 20), key='-SPEED-')],
+        [sg.Text('Velocidad:'), sg.Slider(range=(1, 10), default_value=5, orientation='h', size=(15, 20), key='-SPEED-')],
         [sg.Button('Salir')]
     ]
 
@@ -86,6 +100,19 @@ def main():
             nx.set_edge_attributes(tm.graph, values=dict(zip(tm.graph.edges, edge_colors)), name='color')
 
             draw_graph(tm.graph, canvas, figure)
+            
+    def change_language(idioma):
+        if idioma == 'en':
+            locale = 'en'
+        elif idioma == 'fr':
+            locale = 'pr'
+        else:
+            locale = 'es'
+        #gettext.install('mensajes', localedir, names=("ngettext",))
+        #gettext.translation('mensajes', localedir, languages=[locale]).install()
+        
+        
+ 
 
     ani = FuncAnimation(
         tape_figure, 
@@ -101,6 +128,15 @@ def main():
 
         if event == sg.WIN_CLOSED or event == 'Salir':
             break
+        
+        elif event in ('-ES-', '-EN-', '-FR-'):
+            if values['-ES-']:
+                change_language('es')
+            elif values['-EN-']:
+                change_language('en')
+            elif values['-FR-']:
+                change_language('fr')
+            
 
         elif event == 'Ejecutar':
             input_text = values['-INPUT-'].strip()
@@ -116,6 +152,8 @@ def main():
                     all_results.append(f"Palabra: {input_word}, Resultado: {final_configuration}")
 
                 window['-OUTPUT-'].update('\n'.join(all_results))
+                
+                
 
         elif event == 'Siguiente Paso':
             ani.event_source.stop()

@@ -1,0 +1,44 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Ejecutar"
+msgstr "Execute"
+
+msgid "Siguiente paso"
+msgstr "Next step"
+
+msgid "Salida"
+msgstr "Output"
+
+msgid "Entrada"
+msgstr "Input"
+
+msgid "Velocidad"
+msgstr "Speed"
+
+msgid "Salir"
+msgstr "Exit"
+
+msgid "Máquina de turing"
+msgstr "Turing Machined"
+
+msgid "Inglés"
+msgstr "English"
+
+msgid "Francés"
+msgstr "French"
+
+msgid "Español"
+msgstr "Spanish"
+
+
+msgid "Palabra"
+msgstr "Word"
+
+
+msgid "Resultado"
+msgstr "Result"
+
+msgid "Configuración actual"
+msgstr "current configuration"

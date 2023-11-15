@@ -10,6 +10,8 @@ import sys
 import os
 
 MAX_FRAMES = 100  
+localedir = os.path.join(os.path.dirname(__file__), 'locale')
+
 
 
 def get_figure_canvas(window):
@@ -44,13 +46,14 @@ def animate_tape(ax, tape_content, head_position, color):
     for i, char in enumerate(tape_content):
         ax.add_patch(plt.Rectangle((i, 0), 1, 1, facecolor=color if i == head_position else 'white', edgecolor='black'))
 
-def main():
-    
-    #translations = gettext.translation('mensajes', localedir, languages=['es'])
-    #translations.install()
-    #_ = translations.gettext
+def main(idioma):
+
         
     tm = TuringMachine()
+    
+    translations = gettext.translation('mensajes', localedir, languages=[idioma])
+    translations.install()
+    _ = translations.gettext
 
     for node in tm.graph.nodes:
         tm.graph.nodes[node]['color'] = 'blue'
@@ -61,22 +64,22 @@ def main():
     
 
     layout = [
-        [sg.Radio('Español','RADIO1', default=True, key='-ES-', enable_events=True),
-         sg.Radio('Inglés', "RADIO1", key='-EN-', enable_events=True),
-         sg.Radio('Francés', "RADIO1", key='-FR-', enable_events=True)],
+        [sg.Radio(_('Español'),'RADIO1', key='-ES-', enable_events=True),
+         sg.Radio(_('Inglés'), "RADIO1", key='-EN-', enable_events=True),
+         sg.Radio(_('Francés'), "RADIO1", key='-FR-', enable_events=True)],
         
-        [sg.Text('Entrada:'), sg.Text('Salida:', pad=((190, 0), 0))],
+        [sg.Text(_('Entrada')), sg.Text(_('Salida'), pad=((190, 0), 0))],
         [sg.Multiline(size=(30, 5), key='-INPUT-'), sg.Output(size=(30, 5), key='-OUTPUT-')],
-        [sg.Button('Ejecutar'), sg.Button('Siguiente Paso')],
+        [sg.Button(_('Ejecutar'), key='-EXECUTE-'), sg.Button(_('Siguiente paso'), key='-NEXT-')],
         [sg.Canvas(key='-CANVAS-', size=(300, 300))],
         [sg.Text('', key='-TAPE-', size=(30, 1))],
         [sg.Text('', key='-HEAD-', size=(30, 1))],
         [sg.Canvas(key='-TAPE-CANVAS-', size=(300, 50))], 
-        [sg.Text('Velocidad:'), sg.Slider(range=(1, 10), default_value=5, orientation='h', size=(15, 20), key='-SPEED-')],
-        [sg.Button('Salir')]
+        [sg.Text(_('Velocidad')), sg.Slider(range=(1, 10), default_value=5, orientation='h', size=(15, 20), key='-SPEED-')],
+        [sg.Button(_('Salir'), key='-EXIT-')]
     ]
 
-    window = sg.Window('Máquina de Turing', layout, finalize=True)
+    window = sg.Window(_('Máquina de Turing'), layout, finalize=True)
     figure, canvas = get_figure_canvas(window)
     tape_figure, tape_canvas = get_tape_canvas(window)
 
@@ -105,11 +108,15 @@ def main():
         if idioma == 'en':
             locale = 'en'
         elif idioma == 'fr':
-            locale = 'pr'
+            locale = 'fr'
         else:
             locale = 'es'
-        #gettext.install('mensajes', localedir, names=("ngettext",))
-        #gettext.translation('mensajes', localedir, languages=[locale]).install()
+       
+        
+        gettext.install('mensajes', localedir, names=("ngettext",))
+        gettext.translation('mensajes', localedir, languages=[locale]).install()
+        main(locale)
+
         
         
  
@@ -126,7 +133,7 @@ def main():
     while True:
         event, values = window.read(timeout=0)
 
-        if event == sg.WIN_CLOSED or event == 'Salir':
+        if event == sg.WIN_CLOSED or event == '-EXIT-':
             break
         
         elif event in ('-ES-', '-EN-', '-FR-'):
@@ -136,9 +143,8 @@ def main():
                 change_language('en')
             elif values['-FR-']:
                 change_language('fr')
-            
 
-        elif event == 'Ejecutar':
+        elif event == '-EXECUTE-':
             input_text = values['-INPUT-'].strip()
             input_words = [word.strip() for word in input_text.split('\n') if word.strip()]
 
@@ -149,13 +155,13 @@ def main():
                     tm.set_tape(input_word)
                     tm.run()
                     final_configuration = tm.get_tape_content()
-                    all_results.append(f"Palabra: {input_word}, Resultado: {final_configuration}")
+                    all_results.append(f'Palabra: {input_word} Resultado: {final_configuration}')
 
                 window['-OUTPUT-'].update('\n'.join(all_results))
                 
                 
 
-        elif event == 'Siguiente Paso':
+        elif event == '-NEXT-':
             ani.event_source.stop()
             input_text = values['-INPUT-'].strip()
             input_words = [word.strip() for word in input_text.split('\n') if word.strip()]
@@ -167,7 +173,7 @@ def main():
                     tm.set_tape(input_word)
                     tm.step()
                     current_configuration = tm.get_tape_content()
-                    all_results.append(f"Palabra: {input_word}, Configuración actual: {current_configuration}")
+                    all_results.append(f"Palabra: {input_word} Configuración actual: {current_configuration}")
 
                 window['-OUTPUT-'].update('\n'.join(all_results))
 
@@ -175,9 +181,11 @@ def main():
 
         speed = values['-SPEED-']
         time.sleep(1 / speed)
+        
+        
 
     ani.event_source.stop()
     window.close()
 
 if __name__ == "__main__":
-    main()
+    main('es')

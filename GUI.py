@@ -10,20 +10,26 @@ import sys
 import os
 import pyttsx3
 from gtts import gTTS
+import pygame
 
 
 MAX_FRAMES = 100  
 localedir = os.path.join(os.path.dirname(__file__), 'locale')
 
 # Inicializar el motor de voz
-engine = pyttsx3.init()
+pygame.mixer.init()
 
-# Función para emitir mensajes de voz
 def emitir_mensaje(mensaje):
     tts = gTTS(text=mensaje, lang='es')
     tts.save("mensaje.mp3")
-    os.system("start mensaje.mp3")
 
+    # Reproducir el archivo de audio con pygame
+    pygame.mixer.music.load("mensaje.mp3")
+    pygame.mixer.music.play()
+
+    # Esperar a que la reproducción termine antes de continuar
+    while pygame.mixer.music.get_busy():
+        pygame.time.Clock().tick(10)
 def get_figure_canvas(window):
     figure, ax = plt.subplots(figsize=(3, 3))
     canvas = FigureCanvasTkAgg(figure, window['-CANVAS-'].TKCanvas)
